@@ -57,6 +57,7 @@ import Foreign.C.Types
 -- non-Haskell 2010
 import GHC.TypeLits
 import Data.Bits
+import Data.Type.Equality
 
 -- | (Kind) Meta-information about integral types.
 --
@@ -164,22 +165,20 @@ type IsIntSubType a b = IsIntBaseSubType (IntBaseType a) (IntBaseType b)
 
 -- Same bit-size predicate
 type family IsIntBaseTypeIso a b :: Bool where
-    IsIntBaseTypeIso (FixedIntTag  n) (FixedIntTag  n) = True
+    IsIntBaseTypeIso a                a                = True
     IsIntBaseTypeIso (FixedIntTag  n) (FixedWordTag n) = True
     IsIntBaseTypeIso (FixedWordTag n) (FixedIntTag  n) = True
-    IsIntBaseTypeIso (FixedWordTag n) (FixedWordTag n) = True
     IsIntBaseTypeIso a                b                = False
 
 type IsIntTypeIso a b = IsIntBaseTypeIso (IntBaseType a) (IntBaseType b)
 
-type family IsIntBaseTypeEq a b :: Bool where
-    IsIntBaseTypeEq (FixedIntTag  n) (FixedIntTag  n) = True
-    IsIntBaseTypeEq (FixedWordTag n) (FixedWordTag n) = True
-    IsIntBaseTypeEq BigIntTag        BigIntTag        = True
-    IsIntBaseTypeEq BigWordTag       BigWordTag       = True
-    IsIntBaseTypeEq a                b                = False
+type family IsIntBaseTypeEq (a :: IntBaseTypeK) (b :: IntBaseTypeK) :: Bool where
+    IsIntBaseTypeEq a a = True
+    IsIntBaseTypeEq a b = False
 
 type IsIntTypeEq a b = IsIntBaseTypeEq (IntBaseType a) (IntBaseType b)
+
+type instance a == b = IsIntBaseTypeEq a b
 
 -- | Statically checked integer conversion which satisfies the property
 --
