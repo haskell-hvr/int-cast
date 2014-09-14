@@ -70,9 +70,9 @@ data IntBaseTypeK
      = FixedIntTag Nat
      -- | fixed-width /n/-bit integers with value range [0, 2ⁿ-1].
      | FixedWordTag Nat
-     -- | integers with value range ]-∞,+∞[.
+     -- | integers with value range (-∞,+∞).
      | BigIntTag
-     -- | naturals with value range [0,+∞[.
+     -- | naturals with value range [0,+∞).
      | BigWordTag
 
 -- | The (open) type family 'IntBaseType' encodes type-level
