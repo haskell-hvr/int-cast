@@ -102,21 +102,21 @@ data IntBaseTypeK
 -- ordering based on the types above. See also 'intCast'.
 type family IntBaseType a :: IntBaseTypeK
 
-type instance IntBaseType Integer = BigIntTag
+type instance IntBaseType Integer = 'BigIntTag
 
 -- Haskell2010 Basic fixed-width Integer Types
-type instance IntBaseType Int8   = FixedIntTag  8
-type instance IntBaseType Int16  = FixedIntTag  16
-type instance IntBaseType Int32  = FixedIntTag  32
-type instance IntBaseType Int64  = FixedIntTag  64
-type instance IntBaseType Word8  = FixedWordTag 8
-type instance IntBaseType Word16 = FixedWordTag 16
-type instance IntBaseType Word32 = FixedWordTag 32
-type instance IntBaseType Word64 = FixedWordTag 64
+type instance IntBaseType Int8   = 'FixedIntTag  8
+type instance IntBaseType Int16  = 'FixedIntTag  16
+type instance IntBaseType Int32  = 'FixedIntTag  32
+type instance IntBaseType Int64  = 'FixedIntTag  64
+type instance IntBaseType Word8  = 'FixedWordTag 8
+type instance IntBaseType Word16 = 'FixedWordTag 16
+type instance IntBaseType Word32 = 'FixedWordTag 32
+type instance IntBaseType Word64 = 'FixedWordTag 64
 
 #if defined(WORD_SIZE_IN_BITS)
-type instance IntBaseType Int    = FixedIntTag  WORD_SIZE_IN_BITS
-type instance IntBaseType Word   = FixedWordTag WORD_SIZE_IN_BITS
+type instance IntBaseType Int    = {-'-} 'FixedIntTag  WORD_SIZE_IN_BITS
+type instance IntBaseType Word   = {-'-} 'FixedWordTag WORD_SIZE_IN_BITS
 #else
 #error Cannot determine bit-size of 'Int'/'Word' type
 #endif
@@ -144,37 +144,37 @@ type instance IntBaseType CUShort    = IntBaseType HTYPE_UNSIGNED_SHORT
 -- Internal class providing the partial order of (improper) subtype-relations
 type family IsIntBaseSubType a b :: Bool where
     -- this relation is reflexive
-    IsIntBaseSubType a                a                = True
+    IsIntBaseSubType a                 a                 = 'True
 
     -- Every integer is a subset of 'Integer'
-    IsIntBaseSubType a                BigIntTag        = True
+    IsIntBaseSubType a                 'BigIntTag        = 'True
 
     -- Even though Haskell2010 doesn't provide naturals, we can use the
     -- tag 'Nat' to denote such entities
-    IsIntBaseSubType (FixedWordTag a) BigWordTag       = True
+    IsIntBaseSubType ('FixedWordTag a) 'BigWordTag       = 'True
 
     -- sub-type relations between fixed-with types
-    IsIntBaseSubType (FixedIntTag  a) (FixedIntTag  b) = a   <=? b
-    IsIntBaseSubType (FixedWordTag a) (FixedWordTag b) = a   <=? b
-    IsIntBaseSubType (FixedWordTag a) (FixedIntTag  b) = a+1 <=? b
+    IsIntBaseSubType ('FixedIntTag  a) ('FixedIntTag  b) = a   <=? b
+    IsIntBaseSubType ('FixedWordTag a) ('FixedWordTag b) = a   <=? b
+    IsIntBaseSubType ('FixedWordTag a) ('FixedIntTag  b) = a+1 <=? b
 
     -- everything else is not a sub-type
-    IsIntBaseSubType a                b               = False
+    IsIntBaseSubType a                 b                 = 'False
 
 type IsIntSubType a b = IsIntBaseSubType (IntBaseType a) (IntBaseType b)
 
 -- Same bit-size predicate
 type family IsIntBaseTypeIso a b :: Bool where
-    IsIntBaseTypeIso a                a                = True
-    IsIntBaseTypeIso (FixedIntTag  n) (FixedWordTag n) = True
-    IsIntBaseTypeIso (FixedWordTag n) (FixedIntTag  n) = True
-    IsIntBaseTypeIso a                b                = False
+    IsIntBaseTypeIso a                 a                 = 'True
+    IsIntBaseTypeIso ('FixedIntTag  n) ('FixedWordTag n) = 'True
+    IsIntBaseTypeIso ('FixedWordTag n) ('FixedIntTag  n) = 'True
+    IsIntBaseTypeIso a                 b                 = 'False
 
 type IsIntTypeIso a b = IsIntBaseTypeIso (IntBaseType a) (IntBaseType b)
 
 type family IsIntBaseTypeEq (a :: IntBaseTypeK) (b :: IntBaseTypeK) :: Bool where
-    IsIntBaseTypeEq a a = True
-    IsIntBaseTypeEq a b = False
+    IsIntBaseTypeEq a a = 'True
+    IsIntBaseTypeEq a b = 'False
 
 type IsIntTypeEq a b = IsIntBaseTypeEq (IntBaseType a) (IntBaseType b)
 
@@ -187,7 +187,7 @@ type instance a == b = IsIntBaseTypeEq a b
 -- Note: This is just a type-restricted alias of 'fromIntegral' and
 -- should therefore lead to the same compiled code as if
 -- 'fromIntegral' had been used instead of 'intCast'.
-intCast :: (Integral a, Integral b, IsIntSubType a b ~ True) => a -> b
+intCast :: (Integral a, Integral b, IsIntSubType a b ~ 'True) => a -> b
 intCast = fromIntegral
 {-# INLINE intCast #-}
 
@@ -200,12 +200,12 @@ intCast = fromIntegral
 -- Note: This is just a type-restricted alias of 'fromIntegral' and
 -- should therefore lead to the same compiled code as if
 -- 'fromIntegral' had been used instead of 'intCast'.
-intCastIso :: (Integral a, Integral b, IsIntTypeIso a b ~ True) => a -> b
+intCastIso :: (Integral a, Integral b, IsIntTypeIso a b ~ 'True) => a -> b
 intCastIso = fromIntegral
 {-# INLINE intCastIso #-}
 
 -- | Version of 'intCast' restricted to casts between types with same value domain.
-intCastEq :: (Integral a, Integral b, IsIntTypeEq a b ~ True) => a -> b
+intCastEq :: (Integral a, Integral b, IsIntTypeEq a b ~ 'True) => a -> b
 intCastEq = fromIntegral
 {-# INLINE intCastEq #-}
 
