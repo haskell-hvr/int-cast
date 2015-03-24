@@ -58,6 +58,7 @@ import Foreign.C.Types
 import GHC.TypeLits
 import Data.Bits
 import Data.Type.Equality
+import Numeric.Natural (Natural)
 
 -- | (Kind) Meta-information about integral types.
 --
@@ -79,7 +80,8 @@ data IntBaseTypeK
 -- information about the value range of an integral type.
 --
 -- This module also provides type family instances for the standard
--- Haskell 2010 integral types (including "Foreign.C.Types").
+-- Haskell 2010 integral types (including "Foreign.C.Types") as well
+-- as the 'Natural' type.
 --
 -- Here's a simple example for registering a custom type with the
 -- "Data.IntCast" facilities:
@@ -103,6 +105,7 @@ data IntBaseTypeK
 type family IntBaseType a :: IntBaseTypeK
 
 type instance IntBaseType Integer = 'BigIntTag
+type instance IntBaseType Natural = 'BigWordTag
 
 -- Haskell2010 Basic fixed-width Integer Types
 type instance IntBaseType Int8   = 'FixedIntTag  8
