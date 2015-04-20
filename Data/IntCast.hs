@@ -88,16 +88,16 @@ data IntBaseTypeK
 --
 -- @
 -- /-- user-implemented unsigned 4-bit integer/
--- data Nibble = …
+-- data MyWord4 = …
 --
 -- /-- declare meta-information/
--- type instance 'IntBaseType' MyWord7 = 'FixedIntTag' 4
+-- type instance 'IntBaseType' MyWord4 = 'FixedIntTag' 4
 --
 -- /-- user-implemented signed 7-bit integer/
 -- data MyInt7 = …
 --
 -- /-- declare meta-information/
--- type instance 'IntBaseType' MyWord7 = 'FixedIntTag' 7
+-- type instance 'IntBaseType' MyInt7 = 'FixedIntTag' 7
 -- @
 --
 -- The type-level predicate 'IsIntSubType' provides a partial
