@@ -13,7 +13,7 @@
 
 -- |
 -- Module:  Data.IntCast
--- Copyright:   © 2014  Herbert Valerio Riedel
+-- Copyright:   © 2014-2018  Herbert Valerio Riedel
 -- License:     BSD-style (see the LICENSE file)
 --
 -- Maintainer:  Herbert Valerio Riedel <hvr@gnu.org>
@@ -25,6 +25,26 @@
 module Data.IntCast
     ( -- * Conversion functions
       -- ** statically checked
+      --
+      -- | In the table below each cell denotes which of the three
+      -- 'intCast', 'intCastIso' and 'intCastEq' conversion operations
+      -- are allowed (i.e. by the type-checker). The rows represent
+      -- the domain @a@ while the columns represent the codomain @b@
+      -- of the @a->b@-typed conversion functions.
+      --
+      -- +-----------+-----------------+--------------+----------------------------------------+------------------------------------------+
+      -- |           | 'Natural'       | 'Word32'     | 'Word64'                               | 'Int'                                    |
+      -- +-----------+-----------------+--------------+----------------------------------------+------------------------------------------+
+      -- | 'Word'    | 'intCast'       |              | 'intCast' & 'intCastEq' & 'intCastIso' | 'intCastIso'                             |
+      -- +-----------+-----------------+--------------+----------------------------------------+------------------------------------------+
+      -- | 'Word16'  | 'intCast'       | 'intCast'    | 'intCast'                              | 'intCast'                                |
+      -- +-----------+-----------------+--------------+----------------------------------------+------------------------------------------+
+      -- | 'Int64'   |                 |              | 'intCastIso'                           | 'intCast' & 'intCastEq' & 'intCastIso'   |
+      -- +-----------+-----------------+--------------+----------------------------------------+------------------------------------------+
+      -- | 'Int8'    |                 |              |                                        | 'intCast'                                |
+      -- +-----------+-----------------+--------------+----------------------------------------+------------------------------------------+
+      --
+      -- __Note:__ The table above assumes a 64-bit platform (i.e. where @finiteBitSize (0 :: Word) == 64@).
       intCast
     , intCastIso
     , intCastEq
@@ -70,13 +90,13 @@ import           Numeric.Natural (Natural)
 -- is conveyed by the 'Bits' class' 'isSigned' and 'bitSizeMaybe'
 -- methods.
 data IntBaseTypeK
-     -- | fixed-width /n/-bit integers with value range [-2ⁿ⁻¹, 2ⁿ⁻¹-1].
+     -- | fixed-width \(n\)-bit integers with value range \( \left[ -2^{n-1}, 2^{n-1}-1 \right] \).
      = FixedIntTag Nat
-     -- | fixed-width /n/-bit integers with value range [0, 2ⁿ-1].
+     -- | fixed-width \(n\)-bit integers with value range  \( \left[ 0, 2^{n} \right] \).
      | FixedWordTag Nat
-     -- | integers with value range ]-∞,+∞[.
+     -- | integers with value range \( \left] -\infty, +\infty \right[ \).
      | BigIntTag
-     -- | naturals with value range [0,+∞[.
+     -- | naturals with value range \( \left[ 0, +\infty \right[ \).
      | BigWordTag
 
 -- | The (open) type family 'IntBaseType' encodes type-level
@@ -94,13 +114,13 @@ data IntBaseTypeK
 -- data Nibble = …
 --
 -- /-- declare meta-information/
--- type instance 'IntBaseType' MyWord7 = 'FixedIntTag' 4
+-- type instance 'IntBaseType' Nibble = 'FixedWordTag' 4
 --
 -- /-- user-implemented signed 7-bit integer/
 -- data MyInt7 = …
 --
 -- /-- declare meta-information/
--- type instance 'IntBaseType' MyWord7 = 'FixedIntTag' 7
+-- type instance 'IntBaseType' MyInt7 = 'FixedIntTag' 7
 -- @
 --
 -- The type-level predicate 'IsIntSubType' provides a partial
@@ -147,7 +167,9 @@ type instance IntBaseType CULLong    = IntBaseType HTYPE_UNSIGNED_LONG_LONG
 type instance IntBaseType CULong     = IntBaseType HTYPE_UNSIGNED_LONG
 type instance IntBaseType CUShort    = IntBaseType HTYPE_UNSIGNED_SHORT
 
--- Internal class providing the partial order of (improper) subtype-relations
+-- | Closed type family providing the partial order of (improper) subtype-relations
+--
+-- 'IsIntSubType' provides a more convenient entry point.
 type family IsIntBaseSubType a b :: Bool where
     -- this relation is reflexive
     IsIntBaseSubType a                 a                 = 'True
@@ -169,7 +191,13 @@ type family IsIntBaseSubType a b :: Bool where
 
 type IsIntSubType a b = IsIntBaseSubType (IntBaseType a) (IntBaseType b)
 
--- Same bit-size predicate
+-- | Closed type family representing an equality-relation on bit-width
+--
+-- This is a superset of the 'IsIntBaseTypeEq' relation, as it ignores
+-- the signedness of fixed-size integers (i.e. 'Int32' is considered
+-- equal to 'Word32').
+--
+-- 'IsIntTypeIso' provides a more convenient entry point.
 type family IsIntBaseTypeIso a b :: Bool where
     IsIntBaseTypeIso a                 a                 = 'True
     IsIntBaseTypeIso ('FixedIntTag  n) ('FixedWordTag n) = 'True
@@ -178,6 +206,9 @@ type family IsIntBaseTypeIso a b :: Bool where
 
 type IsIntTypeIso a b = IsIntBaseTypeIso (IntBaseType a) (IntBaseType b)
 
+-- | Closed type family representing an equality-relation on the integer base-type.
+--
+-- 'IsIntBaseTypeEq' provides a more convenient entry point.
 type family IsIntBaseTypeEq (a :: IntBaseTypeK) (b :: IntBaseTypeK) :: Bool where
     IsIntBaseTypeEq a a = 'True
     IsIntBaseTypeEq a b = 'False
@@ -195,7 +226,7 @@ type IsIntTypeEq a b = IsIntBaseTypeEq (IntBaseType a) (IntBaseType b)
 --
 --  * @'toInteger' ≡ 'toInteger' . intCast@
 --
--- Note: This is just a type-restricted alias of 'fromIntegral' and
+-- __Note:__ This is just a type-restricted alias of 'fromIntegral' and
 -- should therefore lead to the same compiled code as if
 -- 'fromIntegral' had been used instead of 'intCast'.
 intCast :: (Integral a, Integral b, IsIntSubType a b ~ 'True) => a -> b
@@ -208,14 +239,22 @@ intCast = fromIntegral
 --
 --  * @'toInteger' ('intCastIso' a) == 'toInteger' b     (__if__ 'toInteger' a == 'toInteger' b)@
 --
--- Note: This is just a type-restricted alias of 'fromIntegral' and
+-- __Note:__ This is just a type-restricted alias of 'fromIntegral' and
 -- should therefore lead to the same compiled code as if
--- 'fromIntegral' had been used instead of 'intCast'.
+-- 'fromIntegral' had been used instead of 'intCastIso'.
 intCastIso :: (Integral a, Integral b, IsIntTypeIso a b ~ 'True) => a -> b
 intCastIso = fromIntegral
 {-# INLINE intCastIso #-}
 
 -- | Version of 'intCast' restricted to casts between types with same value domain.
+--
+-- 'intCastEq' is the most constrained of the three conversions: The
+-- existence of a 'intCastEq' conversion implies the existence of the
+-- other two, i.e. 'intCastIso' and 'intCast'.
+--
+-- __Note:__ This is just a type-restricted alias of 'fromIntegral' and
+-- should therefore lead to the same compiled code as if
+-- 'fromIntegral' had been used instead of 'intCastIso'.
 intCastEq :: (Integral a, Integral b, IsIntTypeEq a b ~ 'True) => a -> b
 intCastEq = fromIntegral
 {-# INLINE intCastEq #-}
@@ -280,7 +319,7 @@ isBitSubType _x _y
 -- >       }
 -- >   }
 --
--- __NOTE__: Starting with @base-4.8@, this function has been added to "Data.Bits"
+-- __Note:__ Starting with @base-4.8@, this function has been added to "Data.Bits"
 -- under the name 'Data.Bits.toIntegralSized'.
 --
 intCastMaybe :: (Integral a, Integral b, Bits a, Bits b) => a -> Maybe b

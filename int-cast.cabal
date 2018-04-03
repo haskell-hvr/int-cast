@@ -12,7 +12,7 @@ maintainer:          hvr@gnu.org
 category:            Data
 build-type:          Simple
 description:
-  Provides statically or dynamically checked conversions between integral types.
+  Provides statically or dynamically checked conversions between integral types. See documentation in "Data.IntCast" for more details.
 
 extra-source-files:  changelog.md
 
