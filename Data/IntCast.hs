@@ -1,4 +1,8 @@
-{-# LANGUAGE CPP, DataKinds, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE CPP                  #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeOperators        #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 #if __GLASGOW_HASKELL__ < 707
 #error This code requires GHC 7.7+
@@ -50,15 +54,15 @@ module Data.IntCast
     ) where
 
 -- Haskell 2010+
-import Data.Int
-import Data.Word
-import Foreign.C.Types
+import           Data.Int
+import           Data.Word
+import           Foreign.C.Types
 
 -- non-Haskell 2010
-import GHC.TypeLits
-import Data.Bits
-import Data.Type.Equality
-import Numeric.Natural (Natural)
+import           Data.Bits
+import           Data.Type.Equality
+import           GHC.TypeLits
+import           Numeric.Natural    (Natural)
 
 -- | (Kind) Meta-information about integral types.
 --
