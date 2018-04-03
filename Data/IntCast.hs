@@ -54,15 +54,14 @@ module Data.IntCast
     ) where
 
 -- Haskell 2010+
+import           Data.Bits
 import           Data.Int
 import           Data.Word
 import           Foreign.C.Types
 
 -- non-Haskell 2010
-import           Data.Bits
-import           Data.Type.Equality
 import           GHC.TypeLits
-import           Numeric.Natural    (Natural)
+import           Numeric.Natural (Natural)
 
 -- | (Kind) Meta-information about integral types.
 --
@@ -185,7 +184,12 @@ type family IsIntBaseTypeEq (a :: IntBaseTypeK) (b :: IntBaseTypeK) :: Bool wher
 
 type IsIntTypeEq a b = IsIntBaseTypeEq (IntBaseType a) (IntBaseType b)
 
-type instance a == b = IsIntBaseTypeEq a b
+-- Starting w/ GHC 8.4, (==) became a closed type-family, so the
+-- following convenience instance isn't possibly anymore
+--
+-- type instance a == b = IsIntBaseTypeEq a b
+--
+-- https://github.com/haskell-hvr/int-cast/issues/3
 
 -- | Statically checked integer conversion which satisfies the property
 --
