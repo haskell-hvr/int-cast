@@ -275,6 +275,10 @@ isBitSubType _x _y
 -- >       ; True -> Just (W16# (narrow16Word# (int2Word# b1)))
 -- >       }
 -- >   }
+--
+-- __NOTE__: Starting with @base-4.8@, this function has been added to "Data.Bits"
+-- under the name 'Data.Bits.toIntegralSized'.
+--
 intCastMaybe :: (Integral a, Integral b, Bits a, Bits b) => a -> Maybe b
 -- the code below relies on GHC optimizing away statically decidable branches
 intCastMaybe x
