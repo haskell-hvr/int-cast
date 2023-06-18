@@ -81,7 +81,10 @@ import           Foreign.C.Types
 
 -- non-Haskell 2010
 import           GHC.TypeLits
+
+#if __GLASGOW_HASKELL__ < 900
 import           Numeric.Natural (Natural)
+#endif
 
 -- | (Kind) Meta-information about integral types.
 --
