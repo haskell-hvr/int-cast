@@ -131,7 +131,9 @@ data IntBaseTypeK
 type family IntBaseType a :: IntBaseTypeK
 
 type instance IntBaseType Integer = 'BigIntTag
+#if __GLASGOW_HASKELL__ < 900
 type instance IntBaseType Natural = 'BigWordTag
+#endif
 
 -- Haskell2010 Basic fixed-width Integer Types
 type instance IntBaseType Int8   = 'FixedIntTag  8
