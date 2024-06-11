@@ -16,8 +16,8 @@ description:
   Provides statically or dynamically checked conversions between integral types. See documentation in "Data.IntCast" for more details.
 
 tested-with:
-  GHC == 9.6.2
-  GHC == 9.4.5
+  GHC == 9.6.5
+  GHC == 9.4.8
   GHC == 9.2.8
   GHC == 9.0.2
   GHC == 8.10.7
