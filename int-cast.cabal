@@ -45,7 +45,7 @@ library
                        TypeOperators
                        UndecidableInstances
 
-  build-depends:       base >=4.7 && <4.21
+  build-depends:       base >=4.7 && <4.22
   if !impl(ghc>=7.10)
     build-depends:     nats >=0.1 && <1.1
 
@@ -59,7 +59,7 @@ test-suite int-cast-test
   ghc-options:         -Wall
   build-depends:       int-cast
                      , base
-                     , QuickCheck                 ==2.14.*
+                     , QuickCheck                 >= 2.11 && < 2.17
                      , test-framework             ==0.8.*
                      , test-framework-quickcheck2 ==0.3.*
 
